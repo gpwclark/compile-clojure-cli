@@ -14,7 +14,9 @@ USER root
 
 # install tools
 RUN yum -y update
-RUN yum -y install zlib-devel java-1.8.0-openjdk-devel wget gcc
+#RUN yum -y install zlib-devel java-1.8.0-openjdk-devel wget gcc nss
+RUN yum -y install zlib-devel java-1.8.0-openjdk-devel wget gcc nss git
+RUN yum -y update nss
 RUN useradd -ms /bin/bash $USER_NAME; exit 0
 
 #install clojure
@@ -28,12 +30,18 @@ WORKDIR /home/$USER_NAME/bin
 RUN wget https://raw.github.com/technomancy/leiningen/stable/bin/lein
 RUN chmod a+x /home/$USER_NAME/bin/lein
 
+#install graal
 RUN mkdir -p /opt/
 WORKDIR /opt/
 RUN wget $GRAAL_URL/$GRAAL_VM_TAR_GZ
 RUN tar -zxvf $GRAAL_VM_TAR_GZ
 RUN chown root:root /opt
 RUN chmod 0755 /opt
+
+#install boot
+#RUN wget -O /home/$USER_NAME/bin/boot https://github.com/boot-clj/boot-bin/releases/download/latest/boot.sh
+#RUN chmod +x /home/$USER_NAME/bin/boot
+RUN bash -c "cd /usr/local/bin && curl -fsSLo boot https://github.com/boot-clj/boot-bin/releases/download/latest/boot.sh && chmod 755 boot"
 
 #add app dir
 RUN mkdir -p /home/$USER_NAME/app
@@ -45,6 +53,10 @@ RUN chown -R $USER_NAME:$USER_NAME /home/$USER_NAME
 USER $USER_NAME
 ENV PATH=/home/$USER_NAME/bin:${PATH}
 WORKDIR /home/$USER_NAME/app
+RUN date
+RUN export BOOT_JVM_OPTIONS="-Djavax.net.debug=SSL"
+RUN boot uberjar
+RUN find .
 #RUN lein compile && lein uberjar
 #RUN cp target/$TARGET_JAR .
 #ENV PATH=/opt/$GRAAL_VM_DIR_NAME/bin:${PATH}
@@ -53,10 +65,13 @@ WORKDIR /home/$USER_NAME/app
 		#-J-Xmx3G -J-Xms3G --no-server \
 		#-jar $TARGET_JAR
 
+RUN java -agentlib:native-image-agent=config-output-dir=config-output-dir/ -jar closh-zero.jar && check_times.clj && exit
+
 RUN native-image \
 	--no-server \
 	--report-unsupported-elements-at-runtime \
 	-H:ReflectionConfigurationFiles=reflectconfig \
+	-H:ConfigurationResourceRoots=config-output-dir \
 	-jar closh-zero.jar \
 	 -H:Name=./target/closh-zero
 		#-cp closh-zero.jar closh.zero.frontend.rebel \
