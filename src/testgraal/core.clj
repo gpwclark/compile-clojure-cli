@@ -1,6 +1,5 @@
 (ns testgraal.core
-  (:require [cli-matic.core :refer [run-cmd]]
-            [testgraal.full_wc :as wc])
+  (:require [cli-matic.core :refer [run-cmd]])
   (:gen-class))
 
 (defn add_numbers
@@ -14,14 +13,6 @@
   [{:keys [pa pb base]}]
   (println
     (Integer/toString (- pa pb) base)))
-
-(defn trim-logs
-  "Given a filepath, a regexp for filenames, and a reduction factor, shrink
-  the logs appropriately. Default suffix to save original log is by suffixing
-  the original filename with .orig."
-  [{:keys [fp base]}]
-   (let [word-count (wc/wc fp)]
-     (println (apply str word-count ":" fp))))
 
 (def CONFIGURATION
   {:app         {:command     "toycalc"
@@ -42,12 +33,7 @@
                   :description "Subtracts parameter B from A"
                   :opts        [{:option "pa" :short "a" :as "Parameter A" :type :int :default 0}
                                {:option "pb" :short "b" :as "Parameter B" :type :int :default 0}]
-                  :runs        subtract_numbers}
-                 {:command     "trim-logs" :short "t"
-                  :description "Trims logs to specified percentage of original."
-                  :opts        [{:option "fp" :short "f" :as "filename" :type :string  :default "/tmp"}
-                                 ]
-                  :runs        trim-logs}]})
+                  :runs        subtract_numbers}]})
 
 (defn -main
   "This is our entry point.
