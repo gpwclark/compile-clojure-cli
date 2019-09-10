@@ -14,18 +14,23 @@ binary is made `/home/clj/app/target/testgraal-0.1.0-SNAPSHOT-standalone`
 A Clojure library designed to ... well, that part is up to you.
 
 ## Usage
--	run 
+-	build 
 ``
-lein native-image
+./build.sh
 ```
-- to use
+-	to use
 ```
-./target/testgraal --help
-./target/testgraal add -a 1 -b 2
+./run.sh --help
 ```
--	compare
+-	this scripts uses entyrpoint/command tricks to essentially turn the compiled
+clj app into an "executable" docker container. If this is not what you want I 
+recommend starting the container, and using "docker cp" to extract the executable
+or using the -v parameter to get the binary out of the running container.
+## Compare
+To test the difference between the two...
 ```
-lein native-image
+docker run -it --entrypoint /bin/bash testgraal
+```
 time java -jar ./target/testgraal --help
 ```
 	on my hardware: `target/testgraal --help  0.00s user 0.00s system 96% cpu 0.004 total`

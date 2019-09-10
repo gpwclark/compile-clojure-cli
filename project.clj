@@ -9,7 +9,7 @@
   :jvm-opts ["-Dclojure.compiler.direct-linking=true"]
   :main testgraal.core
   :aot :all
-  :native-image {:name "testgraal"                 ;; name of output image, optional
+  :native-image {:name "testgraal.bin"                 ;; name of output image, optional
                 ;; graal-bin "/path/to/graalvm/" ;; path to GraalVM home, optional
                  :opts ["--report-unsupported-elements-at-runtime"
                                     "--initialize-at-build-time"
